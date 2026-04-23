@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QCM 2 - Maths 1ère</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Mêmes styles premium que le QCM 1 */
+        :root {
+            --primary: #4F46E5;
+            --secondary: #ec4899;
+            --success: #10B981;
+            --danger: #EF4444;
+            --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-dark: #1f2937;
+            --text-light: #4b5563;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-info .avatar { font-size: 2rem; background: white; padding: 5px; border-radius: 50%; }
+        .user-info .pseudo { font-weight: 700; color: var(--primary); }
+        
+        .progress-container { text-align: right; }
+        .progress-text { font-weight: 600; font-size: 0.9rem; color: var(--text-dark); }
+        
+        .btn-back {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        #quiz-container { max-width: 800px; margin: 0 auto; width: 100%; padding-bottom: 80px; }
+
+        .question-card {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .question-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid transparent;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.15);
+        }
+
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+        .option-btn.correct { background: var(--success); color: white; border-color: var(--success); transform: scale(1.02); }
+        .option-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
+
+        .explanation-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border-left: 5px solid var(--primary);
+            display: none;
+            font-size: 0.95rem;
+            color: var(--text-light);
+            animation: slideDown 0.3s ease-out forwards;
+        }
+
+        .explanation-box.show { display: block; }
+        .explanation-box strong { color: var(--primary); }
+
+        #end-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h2 { font-size: 2rem; color: var(--primary); margin-bottom: 10px; }
+        .score-display { font-size: 3.5rem; font-weight: 700; color: var(--text-dark); margin: 20px 0; }
+        
+        .btn-finish {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        footer { text-align: center; padding: 20px; font-size: 0.8rem; color: var(--text-light); margin-top: auto; }
+        footer strong { color: var(--primary); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header class="glass-panel">
+        <a href="index.html" class="btn-back">◄ Retour</a>
+        <div class="user-info">
+            <span class="avatar" id="header-avatar">👨‍🎓</span>
+            <span class="pseudo" id="header-pseudo">Adam</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-text"><span id="answered-count">0</span> / 15</div>
+        </div>
+    </header>
+
+    <main id="quiz-container">
+        </main>
+
+    <div id="end-modal">
+        <div class="modal-content">
+            <h2>Terminé ! 🎉</h2>
+            <p>Voici ton score pour le QCM 2 :</p>
+            <div class="score-display"><span id="final-score">0</span>/15</div>
+            <p>Tes résultats sont enregistrés.</p>
+            <a href="index.html" class="btn-finish">Retour au menu</a>
+        </div>
+    </div>
+
+    <footer>Conçu par <strong>Boris KINNOUEZAN</strong></footer>
+
+    <script>
+        // --- BASE DE DONNÉES DES QUESTIONS (QCM 2) ---
+        const questions = [
+            {
+                q: "1. Quelle est la dérivée de la fonction f(x) = (2x + 1)e<sup>x</sup> ?",
+                options: ["2e<sup>x</sup>", "(2x + 3)e<sup>x</sup>", "(2x + 1)e<sup>x</sup>"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> On utilise (uv)' = u'v + uv' avec u(x) = 2x+1 et v(x) = e<sup>x</sup>. <br> f'(x) = 2e<sup>x</sup> + (2x+1)e<sup>x</sup> = e<sup>x</sup>(2 + 2x + 1) = (2x + 3)e<sup>x</sup>."
+            },
+            {
+                q: "2. Quelle est l'équation de la tangente à la courbe de f(x) = e<sup>x</sup> au point d'abscisse a = 1 ?",
+                options: ["y = e x", "y = e x + 1", "y = x - e"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> y = f'(1)(x - 1) + f(1). <br> f(1) = e<sup>1</sup> = e et f'(1) = e. <br> y = e(x - 1) + e = ex - e + e = e x."
+            },
+            {
+                q: "3. Calculer la dérivée de g(x) = e<sup>x² - 3x</sup>",
+                options: ["e<sup>2x - 3</sup>", "(x² - 3x)e<sup>x² - 3x</sup>", "(2x - 3)e<sup>x² - 3x</sup>"],
+                correct: 2,
+                ex: "<strong>Explication :</strong> La dérivée de e<sup>u</sup> est u'e<sup>u</sup>. Ici u(x) = x² - 3x, donc u'(x) = 2x - 3. D'où g'(x) = (2x - 3)e<sup>x² - 3x</sup>."
+            },
+            {
+                q: "4. Soit f(x) = (x - 1)e<sup>x</sup>. Sur quel intervalle la fonction f est-elle croissante ?",
+                options: ["Sur [0 ; +&infin;[", "Sur [-1 ; +&infin;[", "Sur [1 ; +&infin;["],
+                correct: 0,
+                ex: "<strong>Explication :</strong> Dérivons f : f'(x) = 1&times;e<sup>x</sup> + (x - 1)e<sup>x</sup> = x e<sup>x</sup>. Comme e<sup>x</sup> > 0, le signe de f'(x) dépend de x. f'(x) &ge; 0 pour x &ge; 0. f est donc croissante sur [0 ; +&infin;[."
+            },
+            {
+                q: "5. Résoudre l'équation : e<sup>2x</sup> - e<sup>x</sup> = 0",
+                options: ["x = 0 ou x = 1", "x = 0", "Impossible"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> On factorise par e<sup>x</sup> : e<sup>x</sup>(e<sup>x</sup> - 1) = 0. Comme e<sup>x</sup> n'est jamais nul, il reste e<sup>x</sup> - 1 = 0 &rArr; e<sup>x</sup> = 1 &rArr; x = 0."
+            },
+            {
+                q: "6. Quelle est la forme canonique de f(x) = 2x² + 4x + 1 ?",
+                options: ["2(x + 1)² - 1", "2(x + 2)² - 3", "(2x + 1)²"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> 2(x² + 2x) + 1. Or (x + 1)² = x² + 2x + 1, donc x² + 2x = (x + 1)² - 1. <br> f(x) = 2[(x + 1)² - 1] + 1 = 2(x + 1)² - 2 + 1 = 2(x + 1)² - 1."
+            },
+            {
+                q: "7. Résoudre l'inéquation : e<sup>3x</sup> &le; e<sup>x + 2</sup>",
+                options: ["x &ge; 1", "x &le; 1", "x &le; 2"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> L'exponentielle est strictement croissante, l'ordre est conservé : 3x &le; x + 2 &rArr; 2x &le; 2 &rArr; x &le; 1."
+            },
+            {
+                q: "8. Quelle est la dérivée de f(x) = e<sup>x</sup> / x  (pour x &ne; 0) ?",
+                options: ["e<sup>x</sup> / x²", "(x e<sup>x</sup> - e<sup>x</sup>) / x²", "(e<sup>x</sup> - x e<sup>x</sup>) / x²"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> Formule (u/v)' = (u'v - uv') / v². Avec u(x) = e<sup>x</sup> et v(x) = x. <br> f'(x) = (e<sup>x</sup> &times; x - e<sup>x</sup> &times; 1) / x² = (x e<sup>x</sup> - e<sup>x</sup>) / x²."
+            },
+            {
+                q: "9. Résoudre l'équation produit : (x² - 9)(e<sup>x</sup> + 5) = 0",
+                options: ["S = {3 ; -3}", "S = {3 ; -3 ; -5}", "S = {9 ; -5}"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> e<sup>x</sup> + 5 est toujours strictement positif, donc ne s'annule jamais. Il reste x² - 9 = 0, soit x² = 9 &rArr; x = 3 ou x = -3."
+            },
+            {
+                q: "10. Simplifier l'expression : A = e<sup>3</sup> &times; (e<sup>-1</sup>)²",
+                options: ["e<sup>1</sup>", "e<sup>2</sup>", "e<sup>5</sup>"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> (e<sup>-1</sup>)² = e<sup>-2</sup>. Donc A = e<sup>3</sup> &times; e<sup>-2</sup> = e<sup>3-2</sup> = e<sup>1</sup> = e."
+            },
+            {
+                q: "11. Quelle est l'équation de la tangente à f(x) = x² - 3x au point d'abscisse a = 0 ?",
+                options: ["y = -3x", "y = 3x", "y = -3x + 1"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> f'(x) = 2x - 3. <br> f(0) = 0 et f'(0) = -3. <br> y = f'(0)(x - 0) + f(0) &rArr; y = -3(x) + 0 = -3x."
+            },
+            {
+                q: "12. Simplifier l'expression : (e<sup>x</sup> + e<sup>-x</sup>) / e<sup>x</sup>",
+                options: ["1 + e<sup>-2x</sup>", "2", "e<sup>2x</sup> + 1"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> On sépare la fraction : (e<sup>x</sup> / e<sup>x</sup>) + (e<sup>-x</sup> / e<sup>x</sup>) = 1 + e<sup>-x-x</sup> = 1 + e<sup>-2x</sup>."
+            },
+            {
+                q: "13. Soit f(x) = -x² + 4x - 4. Combien cette fonction a-t-elle de racines ?",
+                options: ["2 racines", "Aucune racine", "1 racine double"],
+                correct: 2,
+                ex: "<strong>Explication :</strong> Le discriminant &Delta; = 4² - 4(-1)(-4) = 16 - 16 = 0. Il y a donc une seule racine (racine double) : x = -b/2a = -4/-2 = 2."
+            },
+            {
+                q: "14. Quelle est la dérivée de g(x) = 5e<sup>-x</sup> + 2x ?",
+                options: ["-5e<sup>-x</sup> + 2", "5e<sup>-x</sup> + 2", "-5e<sup>x</sup> + 2"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> La dérivée de e<sup>-x</sup> est -e<sup>-x</sup>. Donc la dérivée de 5e<sup>-x</sup> est -5e<sup>-x</sup>. Celle de 2x est 2. Résultat : -5e<sup>-x</sup> + 2."
+            },
+            {
+                q: "15. Lequel de ces tableaux de signes correspond à f'(x) = 2e<sup>3x</sup> ?",
+                options: ["Négatif puis positif", "Toujours positif", "S'annule en 0"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> La fonction exponentielle, peu importe son exposant (ici 3x), est strictement positive sur &reals;. Multipliée par 2, l'expression reste strictement positive pour tout x."
+            }
+        ];
+
+        let currentScore = 0;
+        let answeredQuestions = 0;
+
+        // --- INITIALISATION UTILISATEUR ---
+        function initUser() {
+            const storedUser = localStorage.getItem('mathAppUser');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                document.getElementById('header-pseudo').textContent = userData.pseudo;
+                document.getElementById('header-avatar').textContent = userData.avatar;
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // --- GÉNÉRATION DES QUESTIONS ---
+        function renderQuestions() {
+            const container = document.getElementById('quiz-container');
+            
+            questions.forEach((qObj, qIndex) => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel question-card';
+                card.id = `question-${qIndex}`;
+
+                const title = document.createElement('div');
+                title.className = 'question-title';
+                title.innerHTML = qObj.q;
+                card.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+
+                qObj.options.forEach((optText, optIndex) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerHTML = optText;
+                    btn.onclick = () => handleAnswer(qIndex, optIndex, btn, grid);
+                    grid.appendChild(btn);
+                });
+
+                card.appendChild(grid);
+
+                const explBox = document.createElement('div');
+                explBox.className = 'explanation-box';
+                explBox.id = `expl-${qIndex}`;
+                explBox.innerHTML = qObj.ex;
+                card.appendChild(explBox);
+
+                container.appendChild(card);
+            });
+        }
+
+        // --- GESTION DES RÉPONSES ---
+        function handleAnswer(qIndex, optIndex, selectedBtn, gridContainer) {
+            const qObj = questions[qIndex];
+            const isCorrect = (optIndex === qObj.correct);
+            const allBtns = gridContainer.querySelectorAll('.option-btn');
+
+            allBtns.forEach((btn, index) => {
+                btn.disabled = true;
+                if (index === qObj.correct) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            if (isCorrect) {
+                currentScore++;
+            } else {
+                selectedBtn.classList.add('wrong');
+            }
+
+            document.getElementById(`expl-${qIndex}`).classList.add('show');
+            answeredQuestions++;
+            document.getElementById('answered-count').textContent = answeredQuestions;
+
+            if (answeredQuestions === questions.length) {
+                endQuiz();
+            }
+        }
+
+        // --- FIN DU QCM ---
+        function endQuiz() {
+            // Sauvegarde spécifique au qcm2
+            localStorage.setItem('score_qcm2', `${currentScore}/15`);
+
+            setTimeout(() => {
+                document.getElementById('final-score').textContent = currentScore;
+                document.getElementById('end-modal').style.display = 'flex';
+            }, 1000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initUser();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
