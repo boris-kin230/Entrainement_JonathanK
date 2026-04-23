@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Maths 1ère - Adam's App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #ec4899;
+            --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Conteneurs de type "Glassmorphism" */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+            padding: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- ÉCRAN DE CONNEXION --- */
+        #login-screen {
+            justify-content: center;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .login-box h1 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .login-box p {
+            color: var(--text-light);
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
+        }
+
+        .avatar-selection {
+            margin-bottom: 30px;
+        }
+
+        .avatar-selection h3 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: var(--text-light);
+        }
+
+        .avatars {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .avatar-option {
+            font-size: 2.5rem;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: transform 0.2s, background 0.2s;
+            background: transparent;
+        }
+
+        .avatar-option.selected {
+            background: rgba(255,255,255, 0.8);
+            transform: scale(1.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* --- TABLEAU DE BORD --- */
+        #dashboard-screen {
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            margin-top: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info .avatar-display {
+            font-size: 2.5rem;
+            background: white;
+            padding: 5px;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .user-info .greeting {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-info .greeting span.name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .user-info .greeting span.level {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) { /* Pour iPad et plus grand */
+            .grid-menu {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .card {
+            text-decoration: none;
+            color: var(--text-dark);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .card-desc {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .qcm-card .card-icon { color: var(--primary); }
+        .exo-card .card-icon { color: var(--secondary); }
+
+        .progress-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: auto;
+        }
+
+        footer strong {
+            color: var(--primary);
+        }
+
+        .reset-btn {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            font-size: 0.8rem;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <main id="login-screen" class="screen">
+        <div class="glass-panel login-box">
+            <h1>Bienvenue dans ton espace Maths</h1>
+            <p>Spécialité 1ère - Prépare-toi à exceller !</p>
+            
+            <div class="input-group">
+                <input type="text" id="pseudo-input" placeholder="Entre ton pseudo (ex: Adam)" autocomplete="off">
+            </div>
+
+            <div class="avatar-selection">
+                <h3>Choisis ton avatar :</h3>
+                <div class="avatars">
+                    <div class="avatar-option selected" data-avatar="👨‍🎓">👨‍🎓</div>
+                    <div class="avatar-option" data-avatar="🦊">🦊</div>
+                    <div class="avatar-option" data-avatar="🚀">🚀</div>
+                    <div class="avatar-option" data-avatar="🧠">🧠</div>
+                    <div class="avatar-option" data-avatar="🦁">🦁</div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="saveUser()">C'est parti !</button>
+        </div>
+    </main>
+
+    <main id="dashboard-screen" class="screen">
+        <header class="glass-panel header">
+            <div class="user-info">
+                <div class="avatar-display" id="display-avatar">👨‍🎓</div>
+                <div class="greeting">
+                    <span class="name">Salut, <span id="display-pseudo">Adam</span> !</span>
+                    <span class="level">Spé Maths - 1ère</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid-menu">
+            <a href="qcm1.html" class="glass-panel card qcm-card">
+                <span class="progress-badge" id="badge-qcm1">À faire</span>
+                <div class="card-icon">🎯</div>
+                <div class="card-title">QCM 1</div>
+                <div class="card-desc">Exp, Équations 2nd degré</div>
+            </a>
+
+            <a href="qcm2.html" class="glass-panel card qcm-card">
+                <span class="progress-badge" id="badge-qcm2">À faire</span>
+                <div class="card-icon">⚡</div>
+                <div class="card-title">QCM 2</div>
+                <div class="card-desc">Dérivées, Tangentes</div>
+            </a>
+
+            <a href="qcm3.html" class="glass-panel card qcm-card">
+                <span class="progress-badge" id="badge-qcm3">À faire</span>
+                <div class="card-icon">🔥</div>
+                <div class="card-title">QCM 3</div>
+                <div class="card-desc">Mix Global : Variations & Formes</div>
+            </a>
+
+            <a href="exo1.html" class="glass-panel card exo-card">
+                <span class="progress-badge" id="badge-exo1">À faire</span>
+                <div class="card-icon">📈</div>
+                <div class="card-title">Exercice 1</div>
+                <div class="card-desc">Polynômes 3ème degré (8 Q)</div>
+            </a>
+
+            <a href="exo2.html" class="glass-panel card exo-card">
+                <span class="progress-badge" id="badge-exo2">À faire</span>
+                <div class="card-icon">➗</div>
+                <div class="card-title">Exercice 2</div>
+                <div class="card-desc">Fractions Rationnelles (8 Q)</div>
+            </a>
+
+            <a href="exo3.html" class="glass-panel card exo-card">
+                <span class="progress-badge" id="badge-exo3">À faire</span>
+                <div class="card-icon">e^x</div>
+                <div class="card-title">Exercice 3</div>
+                <div class="card-desc">Fonctions Exponentielles (8 Q)</div>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        Conçu par <strong>Boris KINNOUEZAN</strong><br>
+        <button class="reset-btn" id="logout-btn" style="display:none;" onclick="logout()">Changer d'utilisateur</button>
+    </footer>
+
+    <script>
+        // Gestion de la sélection d'avatar
+        let selectedAvatar = '👨‍🎓';
+        const avatarOptions = document.querySelectorAll('.avatar-option');
+        
+        avatarOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                avatarOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedAvatar = option.getAttribute('data-avatar');
+            });
+        });
+
+        // Initialisation de l'application
+        function initApp() {
+            const storedUser = localStorage.getItem('mathAppUser');
+            const loginScreen = document.getElementById('login-screen');
+            const dashboardScreen = document.getElementById('dashboard-screen');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            if (storedUser) {
+                // Utilisateur existant
+                const userData = JSON.parse(storedUser);
+                document.getElementById('display-pseudo').textContent = userData.pseudo;
+                document.getElementById('display-avatar').textContent = userData.avatar;
+                
+                loginScreen.classList.remove('active');
+                dashboardScreen.classList.add('active');
+                logoutBtn.style.display = 'inline-block';
+
+                updateBadges(); // Met à jour les scores affichés s'ils existent
+            } else {
+                // Nouvel utilisateur
+                loginScreen.classList.add('active');
+                dashboardScreen.classList.remove('active');
+                logoutBtn.style.display = 'none';
+            }
+        }
+
+        // Sauvegarde de l'utilisateur
+        function saveUser() {
+            const pseudoInput = document.getElementById('pseudo-input').value.trim();
+            
+            if (pseudoInput === '') {
+                alert('Veuillez entrer un pseudo valide !');
+                return;
+            }
+
+            const userData = {
+                pseudo: pseudoInput,
+                avatar: selectedAvatar
+            };
+
+            localStorage.setItem('mathAppUser', JSON.stringify(userData));
+            initApp();
+        }
+
+        // Déconnexion
+        function logout() {
+            if(confirm("Veux-tu vraiment changer d'utilisateur ? Tes scores actuels seront réinitialisés.")){
+                localStorage.clear();
+                initApp();
+            }
+        }
+
+        // Mise à jour visuelle des scores (sera utile quand on aura fait les QCMs)
+        function updateBadges() {
+            const tests = ['qcm1', 'qcm2', 'qcm3', 'exo1', 'exo2', 'exo3'];
+            tests.forEach(test => {
+                const score = localStorage.getItem(`score_${test}`);
+                const badge = document.getElementById(`badge-${test}`);
+                if (score) {
+                    badge.textContent = score;
+                    badge.style.color = '#10B981'; // Vert pour indiquer que c'est fait
+                }
+            });
+        }
+
+        // Lancement au chargement
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
