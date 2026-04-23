@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Exercice 1 - Maths 1ère</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+            svg: { fontCache: 'global' },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        document.getElementById('loader').style.opacity = '0';
+                        setTimeout(() => document.getElementById('loader').style.display = 'none', 300);
+                    });
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <style>
+        /* ==========================================================================
+           1. VARIABLES PREMIUM ET RESET
+           ========================================================================== */
+        :root {
+            --primary: #005AAA; --primary-light: #4D9EEB;
+            --accent-pink: #EC008C; --accent-cyan: #00AEEF;
+            --accent-green: #8CC63F; --accent-yellow: #FFF200;
+            --bg-color: #F8FAFC; --surface-white: rgba(255, 255, 255, 0.85);
+            --surface-solid: #FFFFFF; --text-dark: #0F172A; --text-gray: #475569;
+            --success: #10B981; --danger: #EF4444;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 40px -10px rgba(0, 90, 170, 0.12);
+            --radius-lg: 24px; --radius-xl: 32px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-dark);
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column;
+        }
+
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color);
+            z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.3s ease;
+        }
+        .spinner { border: 4px solid rgba(140, 198, 63, 0.2); border-top: 4px solid var(--accent-green); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ==========================================================================
+           2. ARRIÈRE-PLAN ANIMÉ
+           ========================================================================== */
+        .bg-orbs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(70px); animation: float 20s infinite ease-in-out alternate; opacity: 0.3; }
+        .orb-1 { width: 350px; height: 350px; background: rgba(140, 198, 63, 0.4); top: -50px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: rgba(0, 174, 239, 0.3); bottom: -100px; right: -50px; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.05); } }
+
+        /* ==========================================================================
+           3. HEADER STICKY
+           ========================================================================== */
+        header {
+            position: sticky; top: 0; z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5); padding: 15px 20px;
+            box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-info .avatar { font-size: 2rem; background: white; padding: 5px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .user-info .pseudo { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--primary); }
+        
+        .btn-back {
+            display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px;
+            font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; text-decoration: none; transition: 0.2s;
+            background: #F1F5F9; color: var(--primary);
+        }
+        .btn-back:active { transform: scale(0.95); }
+
+        .progress-indicator { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--text-gray); }
+        .progress-indicator span { color: var(--accent-green); }
+
+        /* ==========================================================================
+           4. CONTENU PRINCIPAL & EXERCICE
+           ========================================================================== */
+        main { padding: 25px 20px 80px 20px; max-width: 850px; margin: 0 auto; width: 100%; flex: 1; }
+
+        .glass-panel {
+            background: var(--surface-solid); border-radius: var(--radius-lg); padding: 30px 25px;
+            margin-bottom: 25px; box-shadow: var(--shadow-xl); position: relative; border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .context-box::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: var(--accent-green); }
+        
+        .context-box h2 { font-family: 'Outfit', sans-serif; color: var(--primary); font-size: 1.6rem; font-weight: 800; margin-bottom: 15px; }
+        .context-box p { font-size: 1.1rem; line-height: 1.7; color: var(--text-dark); margin-bottom: 15px; }
+
+        /* --- SCHÉMA SVG PREMIUM --- */
+        .svg-container {
+            width: 100%; background: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 20px;
+            padding: 10px; margin: 25px 0; display: flex; justify-content: center; align-items: center;
+            box-shadow: inset 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        /* --- ÉTAPES GUIDÉES --- */
+        .step-card {
+            display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-top: 6px solid var(--accent-cyan);
+        }
+        .step-card.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .step-title { font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 15px; color: var(--primary); }
+        .question-text { font-size: 1.1rem; margin-bottom: 20px; line-height: 1.6; }
+
+        .options-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
+        @media (min-width: 600px) { .options-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .option-btn {
+            background: #F1F5F9; border: 2px solid transparent; padding: 18px 15px; border-radius: 16px;
+            font-size: 1.05rem; font-weight: 600; color: var(--text-dark); cursor: pointer; transition: all 0.3s;
+            text-align: center; display: flex; justify-content: center; align-items: center; min-height: 80px;
+        }
+        .option-btn:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--accent-cyan); box-shadow: 0 8px 20px rgba(0,174,239,0.15); }
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+        .option-btn.correct { background: #F0FDF4; color: #166534; border-color: var(--success); transform: scale(1.02); box-shadow: 0 8px 20px rgba(16,185,129,0.2); }
+        .option-btn.wrong { background: #FEF2F2; color: #991B1B; border-color: var(--danger); animation: shake 0.4s; }
+
+        .feedback-area { margin-top: 25px; display: none; }
+        .feedback-area.show { display: block; animation: slideDown 0.3s ease-out; }
+
+        .explanation-box {
+            padding: 20px 25px; border-radius: 16px; background: #F8FAFC;
+            border-left: 6px solid var(--success); font-size: 1.05rem; color: var(--text-dark); line-height: 1.7;
+        }
+        .explanation-box strong { color: var(--success); font-family: 'Outfit', sans-serif; font-size: 1.2rem; display: block; margin-bottom: 5px; }
+
+        .btn-next-step {
+            margin-top: 20px; background: var(--accent-cyan); color: white; border: none;
+            padding: 18px; border-radius: 16px; font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 800;
+            cursor: pointer; width: 100%; transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 20px rgba(0,174,239,0.25); display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .btn-next-step:active { transform: scale(0.98); }
+
+        /* ==========================================================================
+           5. MODAL DE FIN
+           ========================================================================== */
+        #end-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6);
+            display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: var(--surface-solid); padding: 40px 30px; border-radius: 32px; text-align: center;
+            max-width: 450px; width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-content h2 { font-family: 'Outfit', sans-serif; font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; }
+        .modal-content p { font-size: 1.1rem; color: var(--text-gray); margin-bottom: 20px; }
+        .score-display { font-family: 'Outfit', sans-serif; font-size: 4.5rem; font-weight: 900; color: var(--accent-green); margin: 10px 0 30px 0; line-height: 1; }
+        
+        .btn-finish {
+            background: var(--primary); color: white; border: none; padding: 18px 30px; border-radius: 16px;
+            font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 800; width: 100%; cursor: pointer;
+            text-decoration: none; display: inline-block; box-shadow: 0 8px 20px rgba(0,90,170,0.3);
+        }
+
+        footer { text-align: center; padding: 20px; font-size: 0.9rem; color: var(--text-light); margin-top: auto; }
+        footer strong { color: var(--primary); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="font-weight: 600; color: var(--accent-green); font-family: 'Outfit', sans-serif;">Génération du repère...</p>
+    </div>
+
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <header>
+        <a href="index.html" class="btn-back">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg> Quitter
+        </a>
+        <div class="progress-indicator">Étape <span id="step-counter">1</span> / 8</div>
+        <div class="user-info">
+            <span class="pseudo" id="header-pseudo">Adam</span>
+            <span class="avatar" id="header-avatar">👨‍🎓</span>
+        </div>
+    </header>
+
+    <main id="exo-container">
+        <div class="glass-panel context-box">
+            <h2>Étude d'un Polynôme (Degré 3)</h2>
+            <p>On considère la fonction $f$ définie sur $\mathbb{R}$ par :</p>
+            <div style="background: #F1F5F9; padding: 15px; border-radius: 12px; text-align: center; font-size: 1.4rem; font-weight: bold; margin-bottom: 20px; color: var(--primary);">
+                $\displaystyle f(x) = x^3 - 3x^2 + 4$
+            </div>
+            <p>Voici la courbe représentative $\mathcal{C}_f$ de la fonction $f$ tracée dans un repère orthogonal. Observe bien ses variations, ses sommets (points $A$ et $B$) et ses points d'intersection.</p>
+
+            <div class="svg-container">
+                <svg viewBox="-2 -6 6 8" width="100%" height="300px" style="overflow: visible;">
+                    <defs>
+                        <pattern id="grid" width="1" height="1" patternUnits="userSpaceOnUse">
+                            <path d="M 1 0 L 0 0 0 1" fill="none" stroke="#CBD5E1" stroke-width="0.04"/>
+                        </pattern>
+                    </defs>
+                    
+                    <g transform="scale(1, -1)">
+                        <rect x="-2" y="-6" width="6" height="8" fill="url(#grid)" />
+                        
+                        <line x1="-2" y1="0" x2="4" y2="0" stroke="#475569" stroke-width="0.06"/>
+                        <line x1="0" y1="-2" x2="0" y2="6" stroke="#475569" stroke-width="0.06"/>
+
+                        <line x1="1" y1="-0.1" x2="1" y2="0.1" stroke="#475569" stroke-width="0.06"/>
+                        <line x1="2" y1="-0.1" x2="2" y2="0.1" stroke="#475569" stroke-width="0.06"/>
+                        <line x1="3" y1="-0.1" x2="3" y2="0.1" stroke="#475569" stroke-width="0.06"/>
+                        <line x1="-1" y1="-0.1" x2="-1" y2="0.1" stroke="#475569" stroke-width="0.06"/>
+                        <line x1="-0.1" y1="2" x2="0.1" y2="2" stroke="#475569" stroke-width="0.06"/>
+                        <line x1="-0.1" y1="4" x2="0.1" y2="4" stroke="#475569" stroke-width="0.06"/>
+
+                        <line x1="-1" y1="4" x2="1" y2="4" stroke="var(--accent-pink)" stroke-width="0.04" stroke-dasharray="0.1,0.1"/>
+                        <line x1="1" y1="0" x2="3" y2="0" stroke="var(--accent-pink)" stroke-width="0.04" stroke-dasharray="0.1,0.1"/>
+
+                        <line x1="0.33" y1="4" x2="1.66" y2="0" stroke="var(--accent-cyan)" stroke-width="0.04" stroke-dasharray="0.2,0.1"/>
+
+                        <polyline points="
+                            -1.1, -0.961
+                            -1, 0
+                            -0.8, 1.568
+                            -0.6, 2.704
+                            -0.4, 3.456
+                            -0.2, 3.872
+                            0, 4
+                            0.2, 3.888
+                            0.4, 3.584
+                            0.6, 3.136
+                            0.8, 2.592
+                            1, 2
+                            1.2, 1.408
+                            1.4, 0.864
+                            1.6, 0.416
+                            1.8, 0.112
+                            2, 0
+                            2.2, 0.128
+                            2.4, 0.544
+                            2.6, 1.296
+                            2.8, 2.432
+                            3, 4
+                            3.1, 4.961
+                        " fill="none" stroke="var(--primary)" stroke-width="0.08" stroke-linejoin="round" stroke-linecap="round"/>
+
+                        <circle cx="0" cy="4" r="0.1" fill="var(--accent-pink)"/>
+                        <circle cx="2" cy="0" r="0.1" fill="var(--accent-pink)"/>
+                        <circle cx="-1" cy="0" r="0.1" fill="var(--accent-cyan)"/>
+                        <circle cx="1" cy="2" r="0.1" fill="var(--accent-cyan)"/>
+                    </g>
+
+                    <text x="3.8" y="0.4" font-family="Poppins" font-size="0.4" fill="#475569">x</text>
+                    <text x="-0.4" y="-5.6" font-family="Poppins" font-size="0.4" fill="#475569">y</text>
+                    <text x="0.1" y="-4.2" font-family="Poppins" font-size="0.4" font-weight="bold" fill="var(--accent-pink)">A</text>
+                    <text x="2.1" y="-0.2" font-family="Poppins" font-size="0.4" font-weight="bold" fill="var(--accent-pink)">B</text>
+                    <text x="-1.2" y="-0.2" font-family="Poppins" font-size="0.3" fill="var(--accent-cyan)">(-1;0)</text>
+                    <text x="1.2" y="-2" font-family="Poppins" font-size="0.4" fill="var(--primary)">C_f</text>
+                </svg>
+            </div>
+            <p style="font-style: italic; font-size: 0.95rem; text-align: center;">Valide chaque étape ci-dessous pour mener l'étude complète.</p>
+        </div>
+
+        <div id="steps-container"></div>
+    </main>
+
+    <div id="end-modal">
+        <div class="modal-content">
+            <h2>Mission accomplie ! 🚀</h2>
+            <p>Tu as géré l'étude de ce polynôme de degré 3 comme un chef.</p>
+            <div class="score-display"><span id="final-score">0</span>/8</div>
+            <a href="index.html" class="btn-finish">Retour au menu</a>
+        </div>
+    </div>
+
+    <footer>Conçu par <strong>Boris KINNOUEZAN</strong></footer>
+
+    <script>
+        // --- DONNÉES DE L'EXERCICE GUIDÉ (8 Questions Polynôme 3ème degré) ---
+        const steps = [
+            {
+                title: "Étape 1 : Lecture Graphique (Extrema)",
+                question: "Observe la courbe $\\mathcal{C}_f$. Quelles sont les coordonnées du point $A$, correspondant au maximum local de la fonction ?",
+                options: ["$(0 ; 4)$", "$(4 ; 0)$", "$(-1 ; 0)$"],
+                correct: 0,
+                ex: "<strong>C'est bien ça !</strong><br>Le point le plus haut de la première « bosse » de la courbe se situe sur l'axe des ordonnées. Son abscisse est $x=0$ et son ordonnée est $y=4$. Donc $A(0 ; 4)$."
+            },
+            {
+                title: "Étape 2 : Lecture Graphique (Dérivée)",
+                question: "Au point $B(2 ; 0)$, la courbe admet une tangente horizontale (en pointillés roses). Que peux-tu en déduire pour le nombre dérivé $f'(2)$ ?",
+                options: ["$f'(2) = 2$", "$f'(2) = 0$", "$f'(2) = -3$"],
+                correct: 1,
+                ex: "<strong>Exact !</strong><br>Le nombre dérivé $f'(a)$ correspond au coefficient directeur de la tangente au point d'abscisse $a$. Une tangente horizontale a un coefficient directeur nul. Donc $f'(2) = 0$."
+            },
+            {
+                title: "Étape 3 : Calcul de la dérivée",
+                question: "Passons aux calculs. L'expression de la fonction est $f(x) = x^3 - 3x^2 + 4$. Détermine l'expression de sa dérivée $f'(x)$.",
+                options: ["$f'(x) = 3x^2 - 3x$", "$f'(x) = x^2 - 6x$", "$f'(x) = 3x^2 - 6x$"],
+                correct: 2,
+                ex: "<strong>Parfait !</strong><br>On dérive terme à terme :<br>- La dérivée de $x^3$ est $3x^2$.<br>- La dérivée de $-3x^2$ est $-3 \\times 2x = -6x$.<br>- La dérivée de la constante $4$ est $0$.<br>On a bien $f'(x) = 3x^2 - 6x$."
+            },
+            {
+                title: "Étape 4 : Factorisation de la dérivée",
+                question: "Pour étudier le signe de la dérivée $f'(x) = 3x^2 - 6x$, il est souvent utile de la factoriser. Quelle est sa forme factorisée ?",
+                options: ["$3x(x - 2)$", "$x(3x - 2)$", "$3x(x - 6)$"],
+                correct: 0,
+                ex: "<strong>Très bien !</strong><br>Le facteur commun évident est $3x$.<br>$3x^2 - 6x = 3x \\times x - 3x \\times 2 = 3x(x - 2)$."
+            },
+            {
+                title: "Étape 5 : Sens de variation",
+                question: "Les racines de la dérivée sont donc $x_1 = 0$ et $x_2 = 2$. Le coefficient $a=3$ est positif. Sur quel intervalle la fonction $f$ est-elle strictement décroissante ?",
+                options: ["$]-\\infty ; 0[$", "$]0 ; 2[$", "$]2 ; +\\infty[$"],
+                correct: 1,
+                ex: "<strong>Excellente analyse !</strong><br>Un trinôme du second degré de la forme $ax^2+bx+c$ (avec $a>0$) est négatif <strong>entre ses racines</strong>.<br>Donc $f'(x) \\lt 0$ sur $]0 ; 2[$. La fonction $f$ est bien décroissante entre $x=0$ et $x=2$ (ce qu'on voit sur le graphique !)."
+            },
+            {
+                title: "Étape 6 : Calcul algébrique d'une image",
+                question: "Vérifie algébriquement que la courbe coupe l'axe des abscisses en $x = -1$. Calcule $f(-1)$.",
+                options: ["$f(-1) = 0$", "$f(-1) = 8$", "$f(-1) = -2$"],
+                correct: 0,
+                ex: "<strong>Bon calcul !</strong><br>On remplace $x$ par $-1$ dans l'expression de la fonction :<br>$f(-1) = (-1)^3 - 3(-1)^2 + 4 = -1 - 3(1) + 4 = -1 - 3 + 4 = 0$."
+            },
+            {
+                title: "Étape 7 : Équation de tangente",
+                question: "Détermine l'équation réduite de la tangente $\\mathcal{T}$ au point d'abscisse $x = 1$. (Elle est tracée en cyan sur le graphique).",
+                options: ["$y = -3x + 2$", "$y = -3x + 5$", "$y = 3x - 1$"],
+                correct: 1,
+                ex: "<strong>C'est brillant !</strong><br>Formule : $y = f'(1)(x - 1) + f(1)$.<br>1) $f(1) = 1^3 - 3(1)^2 + 4 = 1 - 3 + 4 = 2$.<br>2) $f'(1) = 3(1)^2 - 6(1) = 3 - 6 = -3$.<br>L'équation est : $y = -3(x - 1) + 2 = -3x + 3 + 2 = -3x + 5$."
+            },
+            {
+                title: "Étape 8 : Antécédents graphiques",
+                question: "Dernière question ! Utilise la courbe pour résoudre l'équation $f(x) = 4$. Combien de solutions trouves-tu ?",
+                options: ["Une seule solution", "Trois solutions", "Deux solutions ($x=0$ et $x=3$)"],
+                correct: 2,
+                ex: "<strong>Mission accomplie !</strong><br>Résoudre $f(x) = 4$ revient à chercher les abscisses des points de la courbe situés sur la ligne horizontale $y = 4$.<br>On observe deux points d'intersection : le point $A(0;4)$ et un autre point de coordonnées $(3;4)$. Il y a donc deux solutions : $0$ et $3$."
+            }
+        ];
+
+        let currentStepIndex = 0;
+        let errorsMade = 0;
+
+        function initUser() {
+            const storedUser = localStorage.getItem('mathAppUser');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                document.getElementById('header-pseudo').textContent = userData.pseudo;
+                document.getElementById('header-avatar').textContent = userData.avatar;
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function renderSteps() {
+            const container = document.getElementById('steps-container');
+            
+            steps.forEach((stepObj, index) => {
+                const stepCard = document.createElement('div');
+                stepCard.className = `glass-panel step-card ${index === 0 ? 'active' : ''}`;
+                stepCard.id = `step-${index}`;
+
+                const title = document.createElement('div');
+                title.className = 'step-title';
+                title.innerHTML = stepObj.title;
+                stepCard.appendChild(title);
+
+                const question = document.createElement('div');
+                question.className = 'question-text';
+                question.innerHTML = stepObj.question;
+                stepCard.appendChild(question);
+
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+
+                stepObj.options.forEach((optText, optIndex) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerHTML = optText;
+                    btn.onclick = () => handleAnswer(index, optIndex, btn, grid);
+                    grid.appendChild(btn);
+                });
+                stepCard.appendChild(grid);
+
+                const feedbackArea = document.createElement('div');
+                feedbackArea.className = 'feedback-area';
+                feedbackArea.id = `feedback-${index}`;
+
+                const explBox = document.createElement('div');
+                explBox.className = 'explanation-box';
+                explBox.innerHTML = stepObj.ex;
+                feedbackArea.appendChild(explBox);
+
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'btn-next-step';
+                nextBtn.innerHTML = index === steps.length - 1 ? "Voir mon score 🏆" : `Passer à l'étape ${index + 2} <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle;"><path d="M9 18l6-6-6-6"/></svg>`;
+                nextBtn.onclick = () => nextStep(index);
+                feedbackArea.appendChild(nextBtn);
+
+                stepCard.appendChild(feedbackArea);
+                container.appendChild(stepCard);
+            });
+
+            if(window.MathJax) MathJax.typesetPromise([container]).catch((err) => console.log(err.message));
+        }
+
+        function handleAnswer(stepIndex, optIndex, selectedBtn, gridContainer) {
+            const stepObj = steps[stepIndex];
+            const isCorrect = (optIndex === stepObj.correct);
+
+            if (isCorrect) {
+                const allBtns = gridContainer.querySelectorAll('.option-btn');
+                allBtns.forEach(btn => {
+                    btn.disabled = true;
+                    if (btn === selectedBtn) btn.classList.add('correct');
+                });
+
+                const feedbackArea = document.getElementById(`feedback-${stepIndex}`);
+                feedbackArea.classList.add('show');
+                
+                if(window.MathJax) MathJax.typesetPromise([feedbackArea]).catch((err) => console.log(err.message));
+            } else {
+                if (!selectedBtn.classList.contains('wrong')) {
+                    selectedBtn.classList.add('wrong');
+                    selectedBtn.disabled = true; 
+                    errorsMade++;
+                }
+            }
+        }
+
+        function nextStep(currentIndex) {
+            const currentCard = document.getElementById(`step-${currentIndex}`);
+            currentCard.classList.remove('active');
+            currentCard.style.display = 'none';
+
+            if (currentIndex < steps.length - 1) {
+                const nextCard = document.getElementById(`step-${currentIndex + 1}`);
+                nextCard.style.display = 'block';
+                setTimeout(() => nextCard.classList.add('active'), 50);
+                
+                // Maj compteur header
+                document.getElementById('step-counter').textContent = currentIndex + 2;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                endExercise();
+            }
+        }
+
+        function endExercise() {
+            let score = Math.max(0, 8 - errorsMade);
+            localStorage.setItem('score_exo1', `${score}/8`); // Sauvegardé sous la clé exo1 comme demandé dans le menu
+            
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('end-modal').style.display = 'flex';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initUser();
+            renderSteps();
+        });
+    </script>
+</body>
+</html>
