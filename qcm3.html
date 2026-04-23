@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QCM 3 - Maths 1ère</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #ec4899;
+            --success: #10B981;
+            --danger: #EF4444;
+            --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-dark: #1f2937;
+            --text-light: #4b5563;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-info .avatar { font-size: 2rem; background: white; padding: 5px; border-radius: 50%; }
+        .user-info .pseudo { font-weight: 700; color: var(--primary); }
+        
+        .progress-container { text-align: right; }
+        .progress-text { font-weight: 600; font-size: 0.9rem; color: var(--text-dark); }
+        
+        .btn-back {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        #quiz-container { max-width: 800px; margin: 0 auto; width: 100%; padding-bottom: 80px; }
+
+        .question-card {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .question-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid transparent;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 70px;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.15);
+        }
+
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+        .option-btn.correct { background: var(--success); color: white; border-color: var(--success); transform: scale(1.02); }
+        .option-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
+
+        .explanation-box {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.85);
+            border-left: 5px solid var(--primary);
+            display: none;
+            font-size: 1rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+            animation: slideDown 0.3s ease-out forwards;
+        }
+
+        .explanation-box.show { display: block; }
+        .explanation-box strong { color: var(--primary); font-size: 1.1rem;}
+
+        #end-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h2 { font-size: 2rem; color: var(--primary); margin-bottom: 10px; }
+        .score-display { font-size: 3.5rem; font-weight: 700; color: var(--text-dark); margin: 20px 0; }
+        
+        .btn-finish {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        footer { text-align: center; padding: 20px; font-size: 0.8rem; color: var(--text-light); margin-top: auto; }
+        footer strong { color: var(--primary); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header class="glass-panel">
+        <a href="index.html" class="btn-back">◄ Retour</a>
+        <div class="user-info">
+            <span class="avatar" id="header-avatar">👨‍🎓</span>
+            <span class="pseudo" id="header-pseudo">Adam</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-text"><span id="answered-count">0</span> / 15</div>
+        </div>
+    </header>
+
+    <main id="quiz-container">
+        </main>
+
+    <div id="end-modal">
+        <div class="modal-content">
+            <h2>Terminé ! 🎉</h2>
+            <p>Voici ton score pour le QCM 3 :</p>
+            <div class="score-display"><span id="final-score">0</span>/15</div>
+            <p>Tes résultats sont enregistrés.</p>
+            <a href="index.html" class="btn-finish">Retour au menu</a>
+        </div>
+    </div>
+
+    <footer>Conçu par <strong>Boris KINNOUEZAN</strong></footer>
+
+    <script>
+        // --- BASE DE DONNÉES DES QUESTIONS (QCM 3) avec LaTeX pur ---
+        const questions = [
+            {
+                q: "1. Résoudre dans $\\mathbb{R}$ l'équation : $\\displaystyle e^{x^2 - 4} = 1$",
+                options: ["$x = 2$ et $x = -2$", "$x = 2$", "Pas de solution"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> On sait que $\\displaystyle 1 = e^0$. Donc on résout $\\displaystyle x^2 - 4 = 0 \\Longleftrightarrow x^2 = 4$. Les solutions sont $\\displaystyle x = 2$ et $\\displaystyle x = -2$."
+            },
+            {
+                q: "2. Simplifier l'expression : $\\displaystyle \\frac{e^{3x} \\times (e^{-x})^2}{e^x}$",
+                options: ["$\\displaystyle e^x$", "$\\displaystyle 1$", "$\\displaystyle e^{2x}$"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> Au numérateur : $\\displaystyle e^{3x} \\times e^{-2x} = e^{3x - 2x} = e^x$.<br>Puis la division : $\\displaystyle \\frac{e^x}{e^x} = 1$."
+            },
+            {
+                q: "3. Déterminer la dérivée de la fonction $\\displaystyle f(x) = (x^2 - 1)e^x$",
+                options: ["$\\displaystyle 2x e^x$", "$\\displaystyle (x^2 + 2x - 1)e^x$", "$\\displaystyle (x^2 - 2x - 1)e^x$"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> On utilise $\\displaystyle (uv)' = u'v + uv'$ avec $\\displaystyle u(x) = x^2 - 1$ et $\\displaystyle v(x) = e^x$.<br>$\\displaystyle f'(x) = 2x e^x + (x^2 - 1)e^x = e^x(x^2 + 2x - 1)$."
+            },
+            {
+                q: "4. Donner la forme canonique de $\\displaystyle f(x) = -2x^2 + 8x - 5$",
+                options: ["$\\displaystyle -2(x - 2)^2 + 3$", "$\\displaystyle -2(x - 2)^2 - 5$", "$\\displaystyle 2(x - 2)^2 + 3$"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> $\\displaystyle f(x) = -2(x^2 - 4x) - 5$. Or $\\displaystyle x^2 - 4x = (x - 2)^2 - 4$.<br>Donc $\\displaystyle f(x) = -2[(x - 2)^2 - 4] - 5 = -2(x - 2)^2 + 8 - 5 = -2(x - 2)^2 + 3$."
+            },
+            {
+                q: "5. Déterminer l'équation de la tangente à $\\displaystyle f(x) = -3e^x$ au point d'abscisse $\\displaystyle a = 0$",
+                options: ["$\\displaystyle y = -3x - 3$", "$\\displaystyle y = -3x + 3$", "$\\displaystyle y = -3x$"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> Formule : $\\displaystyle y = f'(0)(x - 0) + f(0)$.<br>$\\displaystyle f(0) = -3e^0 = -3$. Sa dérivée est $\\displaystyle f'(x) = -3e^x$, donc $\\displaystyle f'(0) = -3$.<br>L'équation est $\\displaystyle y = -3x - 3$."
+            },
+            {
+                q: "6. Résoudre l'inéquation : $\\displaystyle e^{-2x + 1} \\gt e^{x - 5}$",
+                options: ["$\\displaystyle x \\gt 2$", "$\\displaystyle x \\lt 2$", "$\\displaystyle x \\lt -2$"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> L'exponentielle est strictement croissante, on conserve l'ordre :<br>$\\displaystyle -2x + 1 \\gt x - 5 \\Longleftrightarrow -3x \\gt -6$. En divisant par -3, on inverse l'ordre : $\\displaystyle x \\lt 2$."
+            },
+            {
+                q: "7. Quel est le sens de variation de $\\displaystyle f(x) = e^{-x^2}$ sur $[0 ; +\\infty[$ ?",
+                options: ["Strictement croissante", "Strictement décroissante", "Constante"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> La dérivée de $\\displaystyle e^u$ est $\\displaystyle u'e^u$. Ici $\\displaystyle u(x) = -x^2 \\implies u'(x) = -2x$.<br>$\\displaystyle f'(x) = -2xe^{-x^2}$. Sur $[0 ; +\\infty[$, $\\displaystyle -2x$ est négatif et l'exponentielle est positive. Donc $\\displaystyle f'(x) \\le 0$, f est décroissante."
+            },
+            {
+                q: "8. Sur quel intervalle le trinôme $\\displaystyle -x^2 + x + 2$ est-il strictement positif ?",
+                options: ["$\\displaystyle ]-1 ; 2[$", "$\\displaystyle ]-\\infty ; -1[ \\cup ]2 ; +\\infty[$", "$\\displaystyle ]-2 ; 1[$"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> $\\displaystyle \\Delta = 1^2 - 4(-1)(2) = 9$. Les racines sont $\\displaystyle x_1 = 2$ et $\\displaystyle x_2 = -1$. Le coefficient $a=-1$ est négatif, le trinôme est positif entre ses racines : $\\displaystyle ]-1 ; 2[$."
+            },
+            {
+                q: "9. Factoriser l'expression : $\\displaystyle x e^x - x^2 e^x$",
+                options: ["$\\displaystyle x e^x (1 - x)$", "$\\displaystyle x e^x (x - 1)$", "$\\displaystyle e^x (x - x^2)$"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> Le facteur commun maximum est $\\displaystyle x e^x$.<br>$\\displaystyle x e^x \\times 1 - x e^x \\times x = x e^x(1 - x)$."
+            },
+            {
+                q: "10. Résoudre l'équation produit : $\\displaystyle (2x - 4)(e^x + 3) = 0$",
+                options: ["$x = 2$ ou $x = -3$", "$x = 2$", "$x = -3$"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> Un produit est nul si un des facteurs est nul. L'expression $\\displaystyle e^x + 3$ est toujours strictement positive, elle ne s'annule jamais. Il reste $\\displaystyle 2x - 4 = 0 \\Longleftrightarrow 2x = 4 \\Longleftrightarrow x = 2$."
+            },
+            {
+                q: "11. Résoudre l'équation : $\\displaystyle e^{x^2} = e^{3x - 2}$",
+                options: ["$S = \\{1 ; 2\\}$", "$S = \\{-1 ; -2\\}$", "$S = \\{1\\}$"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> On identifie les exposants : $\\displaystyle x^2 = 3x - 2 \\Longleftrightarrow x^2 - 3x + 2 = 0$. Les racines de ce trinôme (via $\\Delta$ ou racine évidente 1) sont $1$ et $2$."
+            },
+            {
+                q: "12. Calculer la dérivée de $\\displaystyle f(x) = \\frac{e^x}{x + 1}$ pour $x \\ne -1$",
+                options: ["$\\displaystyle \\frac{x e^x}{(x + 1)^2}$", "$\\displaystyle \\frac{e^x}{(x + 1)^2}$", "$\\displaystyle \\frac{(x + 2)e^x}{(x + 1)^2}$"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> On utilise $\\displaystyle \\left(\\frac{u}{v}\\right)' = \\frac{u'v - uv'}{v^2}$ avec $\\displaystyle u(x)=e^x$ et $\\displaystyle v(x)=x+1$.<br>$\\displaystyle f'(x) = \\frac{e^x(x+1) - e^x(1)}{(x+1)^2} = \\frac{x e^x + e^x - e^x}{(x+1)^2} = \\frac{x e^x}{(x+1)^2}$."
+            },
+            {
+                q: "13. Simplifier l'expression : $\\displaystyle \\left( \\frac{e^x}{e^{-x}} \\right)^3$",
+                options: ["$\\displaystyle e^{6x}$", "$\\displaystyle e^{3x}$", "$\\displaystyle e^x$"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> À l'intérieur des parenthèses : $\\displaystyle \\frac{e^x}{e^{-x}} = e^{x - (-x)} = e^{2x}$.<br>Ensuite, $\\displaystyle (e^{2x})^3 = e^{2x \\times 3} = e^{6x}$."
+            },
+            {
+                q: "14. Quel est le sommet $S$ de la parabole d'équation $\\displaystyle y = 3(x + 1)^2 - 4$ ?",
+                options: ["$S(1 ; -4)$", "$S(-1 ; -4)$", "$S(-1 ; 4)$"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> La forme canonique est $\\displaystyle a(x - \\alpha)^2 + \\beta$. Ici, $\\alpha = -1$ et $\\beta = -4$. Le sommet a pour coordonnées $(\\alpha ; \\beta)$, soit $(-1 ; -4)$."
+            },
+            {
+                q: "15. Sur quel intervalle la fonction $\\displaystyle g(x) = (x + 2)e^x$ est-elle croissante ?",
+                options: ["$\\displaystyle [-2 ; +\\infty[$", "$\\displaystyle [-3 ; +\\infty[$", "$\\displaystyle ]-\\infty ; -3]$"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> On calcule sa dérivée : $\\displaystyle g'(x) = 1 \\cdot e^x + (x+2)e^x = e^x(1 + x + 2) = e^x(x + 3)$.<br>Comme $\\displaystyle e^x \\gt 0$, $\\displaystyle g'(x) \\ge 0 \\Longleftrightarrow x + 3 \\ge 0 \\Longleftrightarrow x \\ge -3$. Elle est donc croissante sur $[-3 ; +\\infty[$."
+            }
+        ];
+
+        let currentScore = 0;
+        let answeredQuestions = 0;
+
+        // --- INITIALISATION UTILISATEUR ---
+        function initUser() {
+            const storedUser = localStorage.getItem('mathAppUser');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                document.getElementById('header-pseudo').textContent = userData.pseudo;
+                document.getElementById('header-avatar').textContent = userData.avatar;
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // --- GÉNÉRATION DES QUESTIONS ---
+        function renderQuestions() {
+            const container = document.getElementById('quiz-container');
+            
+            questions.forEach((qObj, qIndex) => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel question-card';
+                card.id = `question-${qIndex}`;
+
+                const title = document.createElement('div');
+                title.className = 'question-title';
+                title.innerHTML = qObj.q;
+                card.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+
+                qObj.options.forEach((optText, optIndex) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerHTML = optText;
+                    btn.onclick = () => handleAnswer(qIndex, optIndex, btn, grid);
+                    grid.appendChild(btn);
+                });
+
+                card.appendChild(grid);
+
+                const explBox = document.createElement('div');
+                explBox.className = 'explanation-box';
+                explBox.id = `expl-${qIndex}`;
+                explBox.innerHTML = qObj.ex;
+                card.appendChild(explBox);
+
+                container.appendChild(card);
+            });
+
+            // Une fois le HTML injecté, on demande à MathJax de compiler le LaTeX
+            if(window.MathJax) {
+                MathJax.typesetPromise([container]).catch((err) => console.log(err.message));
+            }
+        }
+
+        // --- GESTION DES RÉPONSES ---
+        function handleAnswer(qIndex, optIndex, selectedBtn, gridContainer) {
+            const qObj = questions[qIndex];
+            const isCorrect = (optIndex === qObj.correct);
+            const allBtns = gridContainer.querySelectorAll('.option-btn');
+
+            allBtns.forEach((btn, index) => {
+                btn.disabled = true;
+                if (index === qObj.correct) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            if (isCorrect) {
+                currentScore++;
+            } else {
+                selectedBtn.classList.add('wrong');
+            }
+
+            const explBox = document.getElementById(`expl-${qIndex}`);
+            explBox.classList.add('show');
+            
+            // Re-compiler MathJax s'il y a du LaTeX dans la correction
+            if(window.MathJax) {
+                MathJax.typesetPromise([explBox]).catch((err) => console.log(err.message));
+            }
+
+            answeredQuestions++;
+            document.getElementById('answered-count').textContent = answeredQuestions;
+
+            if (answeredQuestions === questions.length) {
+                endQuiz();
+            }
+        }
+
+        // --- FIN DU QCM ---
+        function endQuiz() {
+            // Sauvegarde spécifique au qcm3
+            localStorage.setItem('score_qcm3', `${currentScore}/15`);
+
+            setTimeout(() => {
+                document.getElementById('final-score').textContent = currentScore;
+                document.getElementById('end-modal').style.display = 'flex';
+            }, 1000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initUser();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
