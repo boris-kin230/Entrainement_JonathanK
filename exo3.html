@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Exercice 3 - Maths 1ère</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+            svg: { fontCache: 'global' },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        document.getElementById('loader').style.opacity = '0';
+                        setTimeout(() => document.getElementById('loader').style.display = 'none', 300);
+                    });
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <style>
+        /* ==========================================================================
+           1. VARIABLES PREMIUM ET RESET
+           ========================================================================== */
+        :root {
+            --primary: #4C1D95; --primary-light: #8B5CF6;
+            --accent-amber: #F59E0B; --accent-cyan: #06B6D4;
+            --accent-green: #10B981; --accent-red: #EF4444;
+            --bg-color: #F5F3FF; --surface-white: rgba(255, 255, 255, 0.85);
+            --surface-solid: #FFFFFF; --text-dark: #1E293B; --text-gray: #475569;
+            --success: #10B981; --danger: #EF4444;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 40px -10px rgba(76, 29, 149, 0.15);
+            --radius-lg: 24px; --radius-xl: 32px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-dark);
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column;
+        }
+
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color);
+            z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.3s ease;
+        }
+        .spinner { border: 4px solid rgba(139, 92, 246, 0.2); border-top: 4px solid var(--primary-light); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ==========================================================================
+           2. ARRIÈRE-PLAN ANIMÉ
+           ========================================================================== */
+        .bg-orbs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); animation: float 20s infinite ease-in-out alternate; opacity: 0.35; }
+        .orb-1 { width: 350px; height: 350px; background: rgba(139, 92, 246, 0.4); top: -50px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: rgba(245, 158, 11, 0.3); bottom: -100px; right: -50px; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.05); } }
+
+        /* ==========================================================================
+           3. HEADER STICKY
+           ========================================================================== */
+        header {
+            position: sticky; top: 0; z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5); padding: 15px 20px;
+            box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-info .avatar { font-size: 2rem; background: white; padding: 5px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .user-info .pseudo { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--primary); }
+        
+        .btn-back {
+            display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px;
+            font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; text-decoration: none; transition: 0.2s;
+            background: #F1F5F9; color: var(--primary);
+        }
+        .btn-back:active { transform: scale(0.95); }
+
+        .progress-indicator { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--text-gray); }
+        .progress-indicator span { color: var(--accent-amber); }
+
+        /* ==========================================================================
+           4. CONTENU PRINCIPAL & EXERCICE
+           ========================================================================== */
+        main { padding: 25px 20px 80px 20px; max-width: 850px; margin: 0 auto; width: 100%; flex: 1; }
+
+        .glass-panel {
+            background: var(--surface-solid); border-radius: var(--radius-lg); padding: 30px 25px;
+            margin-bottom: 25px; box-shadow: var(--shadow-xl); position: relative; border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .context-box::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: var(--accent-amber); }
+        
+        .context-box h2 { font-family: 'Outfit', sans-serif; color: var(--primary); font-size: 1.6rem; font-weight: 800; margin-bottom: 15px; }
+        .context-box p { font-size: 1.1rem; line-height: 1.7; color: var(--text-dark); margin-bottom: 15px; }
+
+        /* --- SCHÉMA SVG PREMIUM --- */
+        .svg-container {
+            width: 100%; background: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 20px;
+            padding: 10px; margin: 25px 0; display: flex; justify-content: center; align-items: center;
+            box-shadow: inset 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        /* --- ÉTAPES GUIDÉES --- */
+        .step-card {
+            display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-top: 6px solid var(--primary-light);
+        }
+        .step-card.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .step-title { font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 15px; color: var(--primary); }
+        .question-text { font-size: 1.1rem; margin-bottom: 20px; line-height: 1.6; }
+
+        .options-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
+        @media (min-width: 600px) { .options-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .option-btn {
+            background: #F1F5F9; border: 2px solid transparent; padding: 18px 15px; border-radius: 16px;
+            font-size: 1.05rem; font-weight: 600; color: var(--text-dark); cursor: pointer; transition: all 0.3s;
+            text-align: center; display: flex; justify-content: center; align-items: center; min-height: 80px;
+        }
+        .option-btn:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--primary-light); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.15); }
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+        .option-btn.correct { background: #F0FDF4; color: #166534; border-color: var(--success); transform: scale(1.02); box-shadow: 0 8px 20px rgba(16,185,129,0.2); }
+        .option-btn.wrong { background: #FEF2F2; color: #991B1B; border-color: var(--danger); animation: shake 0.4s; }
+
+        .feedback-area { margin-top: 25px; display: none; }
+        .feedback-area.show { display: block; animation: slideDown 0.3s ease-out; }
+
+        .explanation-box {
+            padding: 20px 25px; border-radius: 16px; background: #F8FAFC;
+            border-left: 6px solid var(--success); font-size: 1.05rem; color: var(--text-dark); line-height: 1.7;
+        }
+        .explanation-box strong { color: var(--success); font-family: 'Outfit', sans-serif; font-size: 1.2rem; display: block; margin-bottom: 5px; }
+
+        .btn-next-step {
+            margin-top: 20px; background: var(--primary); color: white; border: none;
+            padding: 18px; border-radius: 16px; font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 800;
+            cursor: pointer; width: 100%; transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 20px rgba(76, 29, 149, 0.25); display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .btn-next-step:active { transform: scale(0.98); }
+
+        /* ==========================================================================
+           5. MODAL DE FIN
+           ========================================================================== */
+        #end-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(30, 41, 59, 0.6);
+            display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: var(--surface-solid); padding: 40px 30px; border-radius: 32px; text-align: center;
+            max-width: 450px; width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-content h2 { font-family: 'Outfit', sans-serif; font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; }
+        .modal-content p { font-size: 1.1rem; color: var(--text-gray); margin-bottom: 20px; }
+        .score-display { font-family: 'Outfit', sans-serif; font-size: 4.5rem; font-weight: 900; color: var(--accent-amber); margin: 10px 0 30px 0; line-height: 1; }
+        
+        .btn-finish {
+            background: var(--primary); color: white; border: none; padding: 18px 30px; border-radius: 16px;
+            font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 800; width: 100%; cursor: pointer;
+            text-decoration: none; display: inline-block; box-shadow: 0 8px 20px rgba(76, 29, 149, 0.3);
+        }
+
+        footer { text-align: center; padding: 20px; font-size: 0.9rem; color: var(--text-light); margin-top: auto; }
+        footer strong { color: var(--primary); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="font-weight: 600; color: var(--primary-light); font-family: 'Outfit', sans-serif;">Génération de l'exponentielle...</p>
+    </div>
+
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <header>
+        <a href="index.html" class="btn-back">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg> Quitter
+        </a>
+        <div class="progress-indicator">Étape <span id="step-counter">1</span> / 8</div>
+        <div class="user-info">
+            <span class="pseudo" id="header-pseudo">Adam</span>
+            <span class="avatar" id="header-avatar">👨‍🎓</span>
+        </div>
+    </header>
+
+    <main id="exo-container">
+        <div class="glass-panel context-box">
+            <h2>Étude d'une Fonction Exponentielle</h2>
+            <p>On considère la fonction $f$ définie sur $\mathbb{R}$ par :</p>
+            <div style="background: #F5F3FF; padding: 15px; border-radius: 12px; text-align: center; font-size: 1.4rem; font-weight: bold; margin-bottom: 20px; color: var(--primary);">
+                $\displaystyle f(x) = (2x - 1)e^x$
+            </div>
+            <p>La courbe représentative $\mathcal{C}_f$ de la fonction est tracée ci-dessous. Le repère est parfaitement calibré. Observe ses variations, ses tangentes et ses limites avant de passer aux calculs.</p>
+
+            <div class="svg-container">
+                <svg viewBox="-4 -6 7 8" width="100%" height="320px" style="overflow: visible;">
+                    <defs>
+                        <pattern id="grid" width="1" height="1" patternUnits="userSpaceOnUse">
+                            <path d="M 1 0 L 0 0 0 1" fill="none" stroke="#CBD5E1" stroke-width="0.04"/>
+                        </pattern>
+                    </defs>
+                    
+                    <g transform="scale(1, -1)">
+                        <rect x="-4" y="-6" width="7" height="8" fill="url(#grid)" />
+                        
+                        <line x1="-4" y1="0" x2="3" y2="0" stroke="#475569" stroke-width="0.06"/>
+                        <line x1="0" y1="-2" x2="0" y2="6" stroke="#475569" stroke-width="0.06"/>
+
+                        <line x1="-3" y1="-0.1" x2="-3" y2="0.1" stroke="#475569" stroke-width="0.05"/>
+                        <line x1="-2" y1="-0.1" x2="-2" y2="0.1" stroke="#475569" stroke-width="0.05"/>
+                        <line x1="-1" y1="-0.1" x2="-1" y2="0.1" stroke="#475569" stroke-width="0.05"/>
+                        <line x1="1" y1="-0.1" x2="1" y2="0.1" stroke="#475569" stroke-width="0.05"/>
+                        <line x1="2" y1="-0.1" x2="2" y2="0.1" stroke="#475569" stroke-width="0.05"/>
+
+                        <line x1="-0.1" y1="-1" x2="0.1" y2="-1" stroke="#475569" stroke-width="0.05"/>
+                        <line x1="-0.1" y1="1" x2="0.1" y2="1" stroke="#475569" stroke-width="0.05"/>
+                        <line x1="-0.1" y1="3" x2="0.1" y2="3" stroke="#475569" stroke-width="0.05"/>
+                        <line x1="-0.1" y1="5" x2="0.1" y2="5" stroke="#475569" stroke-width="0.05"/>
+
+                        <line x1="-2" y1="-1.213" x2="1" y2="-1.213" stroke="var(--accent-red)" stroke-width="0.04" stroke-dasharray="0.1,0.1"/>
+
+                        <line x1="-1" y1="-2" x2="3" y2="2" stroke="var(--accent-amber)" stroke-width="0.04" stroke-dasharray="0.15,0.1"/>
+
+                        <polyline points="
+                            -4, -0.165
+                            -3.5, -0.241
+                            -3, -0.349
+                            -2.5, -0.492
+                            -2, -0.677
+                            -1.5, -0.892
+                            -1, -1.104
+                            -0.75, -1.181
+                            -0.5, -1.213
+                            -0.25, -1.168
+                            0, -1
+                            0.25, -0.642
+                            0.5, 0
+                            0.75, 1.058
+                            1, 2.718
+                            1.1, 3.605
+                            1.2, 4.648
+                            1.3, 5.871
+                        " fill="none" stroke="var(--primary)" stroke-width="0.08" stroke-linejoin="round" stroke-linecap="round"/>
+
+                        <circle cx="-0.5" cy="-1.213" r="0.1" fill="var(--accent-red)"/>
+                        <circle cx="0" cy="-1" r="0.1" fill="var(--accent-amber)"/>
+                        <circle cx="0.5" cy="0" r="0.1" fill="var(--accent-cyan)"/>
+                    </g>
+
+                    <text x="2.8" y="-0.2" font-family="Poppins" font-size="0.4" fill="#475569">x</text>
+                    <text x="-0.4" y="-5.6" font-family="Poppins" font-size="0.4" fill="#475569">y</text>
+                    <text x="-0.5" y="1.8" font-family="Poppins" font-size="0.35" font-weight="bold" fill="var(--accent-red)">Min</text>
+                    <text x="0.2" y="1.4" font-family="Poppins" font-size="0.35" font-weight="bold" fill="var(--accent-amber)">A</text>
+                    <text x="0.4" y="-0.3" font-family="Poppins" font-size="0.35" font-weight="bold" fill="var(--accent-cyan)">B</text>
+                    <text x="-0.8" y="0.4" font-family="Poppins" font-size="0.3" fill="#475569">O</text>
+                    <text x="1.5" y="-3.5" font-family="Poppins" font-size="0.4" fill="var(--primary)">C_f</text>
+                </svg>
+            </div>
+            <p style="font-style: italic; font-size: 0.95rem; text-align: center;">Valide chaque étape ci-dessous pour mener l'étude complète.</p>
+        </div>
+
+        <div id="steps-container"></div>
+    </main>
+
+    <div id="end-modal">
+        <div class="modal-content">
+            <h2>Fantastique ! 🌟</h2>
+            <p>Tu as terminé avec succès l'étude de cette fonction exponentielle.</p>
+            <div class="score-display"><span id="final-score">0</span>/8</div>
+            <a href="index.html" class="btn-finish">Retour au menu</a>
+        </div>
+    </div>
+
+    <footer>Conçu par <strong>Boris KINNOUEZAN</strong></footer>
+
+    <script>
+        // --- DONNÉES DE L'EXERCICE GUIDÉ (8 Questions Exponentielle) ---
+        const steps = [
+            {
+                title: "Étape 1 : Lecture Graphique (Limite en $-\\infty$)",
+                question: "Observe la partie gauche de la courbe $\\mathcal{C}_f$ (quand $x$ tend vers $-\\infty$). De quelle droite la courbe semble-t-elle se rapprocher indéfiniment ?",
+                options: ["L'axe des ordonnées ($x = 0$)", "L'axe des abscisses ($y = 0$)", "La droite d'équation $y = -1$"],
+                correct: 1,
+                ex: "<strong>C'est exact !</strong><br>Plus $x$ prend des valeurs négatives grandes (vers la gauche), plus la courbe s'aplatit et se rapproche de $0$ par valeurs négatives. L'axe des abscisses (la droite d'équation $y = 0$) est donc une asymptote horizontale en $-\\infty$."
+            },
+            {
+                title: "Étape 2 : Lecture Graphique (Minimum)",
+                question: "La courbe admet un minimum local. Lis sur le graphique l'abscisse de ce point le plus bas (marqué d'un point rouge et d'une tangente pointillée).",
+                options: ["$x = -1$", "$x = 0$", "$x = -0,5$"],
+                correct: 2,
+                ex: "<strong>Très bien observé !</strong><br>Le point le plus bas de la courbe se trouve exactement à mi-chemin entre $x = -1$ et l'axe des ordonnées. Son abscisse est donc $x = -0,5$."
+            },
+            {
+                title: "Étape 3 : Calcul de la dérivée",
+                question: "Il est temps de dériver ! La fonction est de la forme $u(x)v(x)$ avec $u(x) = 2x - 1$ et $v(x) = e^x$. Quelle est l'expression correcte de $f'(x)$ ?",
+                options: ["$f'(x) = 2e^x$", "$f'(x) = (2x + 1)e^x$", "$f'(x) = (2x - 1)e^x$"],
+                correct: 1,
+                ex: "<strong>C'est du solide !</strong><br>On utilise la formule $(uv)' = u'v + uv'$.<br>Ici $u'(x) = 2$ et $v'(x) = e^x$.<br>$f'(x) = 2e^x + (2x - 1)e^x$<br>On factorise par $e^x$ :<br>$f'(x) = (2 + 2x - 1)e^x = (2x + 1)e^x$."
+            },
+            {
+                title: "Étape 4 : Sens de variation",
+                question: "Puisque $e^x$ est toujours strictement positif, le signe de la dérivée $f'(x) = (2x + 1)e^x$ dépend uniquement de $(2x + 1)$. Sur quel intervalle la fonction $f$ est-elle strictement croissante ?",
+                options: ["$]-\\infty ; -0,5]$", "$[-0,5 ; +\\infty[$", "$[0 ; +\\infty[$"],
+                correct: 1,
+                ex: "<strong>Excellente déduction !</strong><br>La fonction est croissante lorsque $f'(x) > 0$.<br>$2x + 1 > 0 \\iff 2x > -1 \\iff x > -0,5$.<br>La fonction $f$ est donc bien strictement croissante sur l'intervalle $[-0,5 ; +\\infty[$, ce qui confirme notre lecture du minimum de l'étape 2."
+            },
+            {
+                title: "Étape 5 : Intersection avec l'axe des ordonnées",
+                question: "Vérifie algébriquement les coordonnées du point $A$ où la courbe coupe l'axe des ordonnées. Calcule l'image de $0$ par la fonction $f$.",
+                options: ["$f(0) = -1$", "$f(0) = 0$", "$f(0) = 1$"],
+                correct: 0,
+                ex: "<strong>Bon calcul !</strong><br>On remplace $x$ par $0$ dans l'expression initiale :<br>$f(0) = (2(0) - 1)e^0$<br>Comme $e^0 = 1$, on a $f(0) = (-1) \\times 1 = -1$.<br>Le point $A$ a bien pour coordonnées $(0 ; -1)$."
+            },
+            {
+                title: "Étape 6 : Intersection avec l'axe des abscisses",
+                question: "Le point $B$ est l'intersection avec l'axe des abscisses. Quelle est la solution de l'équation $f(x) = 0$ ?",
+                options: ["$x = 0$", "$x = 0,5$", "$x = 1$"],
+                correct: 1,
+                ex: "<strong>Mission accomplie !</strong><br>Pour qu'un produit soit nul, l'un des facteurs doit l'être. On a $(2x - 1)e^x = 0$.<br>Or l'exponentielle n'est jamais nulle ($e^x > 0$).<br>Donc $2x - 1 = 0 \\iff x = 0,5$. Le point $B$ est en $(0,5 ; 0)$."
+            },
+            {
+                title: "Étape 7 : Équation de tangente",
+                question: "La tangente en $x = 0$ (droite jaune en pointillés) passe par le point $A(0 ; -1)$. Détermine son équation en calculant $f'(0)$.",
+                options: ["$y = x - 1$", "$y = 2x - 1$", "$y = -x + 1$"],
+                correct: 0,
+                ex: "<strong>Brillant !</strong><br>1) On calcule le coefficient directeur : $f'(0) = (2(0) + 1)e^0 = 1 \\times 1 = 1$.<br>2) L'ordonnée à l'origine est $f(0) = -1$.<br>L'équation est $y = f'(0)(x - 0) + f(0)$, soit $y = 1(x) - 1 \\implies y = x - 1$."
+            },
+            {
+                title: "Étape 8 : Valeur exacte du minimum",
+                question: "Dernière étape. Nous savons que le minimum est atteint en $x = -0,5$. Quelle est sa <strong>valeur exacte</strong> (l'ordonnée de ce point bas) ?",
+                options: ["$-2e^{-0,5}$", "$-1,21$", "$-e^{-0,5}$"],
+                correct: 0,
+                ex: "<strong>Félicitations, c'est un sans-faute !</strong><br>On remplace $x$ par $-0,5$ dans la fonction :<br>$f(-0,5) = (2(-0,5) - 1)e^{-0,5} = (-1 - 1)e^{-0,5} = -2e^{-0,5}$.<br><em>Note : $-1,21$ n'est qu'une valeur approchée, or en maths on privilégie toujours la valeur exacte avec l'exponentielle.</em>"
+            }
+        ];
+
+        let currentStepIndex = 0;
+        let errorsMade = 0;
+
+        function initUser() {
+            const storedUser = localStorage.getItem('mathAppUser');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                document.getElementById('header-pseudo').textContent = userData.pseudo;
+                document.getElementById('header-avatar').textContent = userData.avatar;
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function renderSteps() {
+            const container = document.getElementById('steps-container');
+            
+            steps.forEach((stepObj, index) => {
+                const stepCard = document.createElement('div');
+                stepCard.className = `glass-panel step-card ${index === 0 ? 'active' : ''}`;
+                stepCard.id = `step-${index}`;
+
+                const title = document.createElement('div');
+                title.className = 'step-title';
+                title.innerHTML = stepObj.title;
+                stepCard.appendChild(title);
+
+                const question = document.createElement('div');
+                question.className = 'question-text';
+                question.innerHTML = stepObj.question;
+                stepCard.appendChild(question);
+
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+
+                stepObj.options.forEach((optText, optIndex) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerHTML = optText;
+                    btn.onclick = () => handleAnswer(index, optIndex, btn, grid);
+                    grid.appendChild(btn);
+                });
+                stepCard.appendChild(grid);
+
+                const feedbackArea = document.createElement('div');
+                feedbackArea.className = 'feedback-area';
+                feedbackArea.id = `feedback-${index}`;
+
+                const explBox = document.createElement('div');
+                explBox.className = 'explanation-box';
+                explBox.innerHTML = stepObj.ex;
+                feedbackArea.appendChild(explBox);
+
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'btn-next-step';
+                nextBtn.innerHTML = index === steps.length - 1 ? "Voir mon score 🏆" : `Passer à l'étape ${index + 2} <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle;"><path d="M9 18l6-6-6-6"/></svg>`;
+                nextBtn.onclick = () => nextStep(index);
+                feedbackArea.appendChild(nextBtn);
+
+                stepCard.appendChild(feedbackArea);
+                container.appendChild(stepCard);
+            });
+
+            if(window.MathJax) MathJax.typesetPromise([container]).catch((err) => console.log(err.message));
+        }
+
+        function handleAnswer(stepIndex, optIndex, selectedBtn, gridContainer) {
+            const stepObj = steps[stepIndex];
+            const isCorrect = (optIndex === stepObj.correct);
+
+            if (isCorrect) {
+                const allBtns = gridContainer.querySelectorAll('.option-btn');
+                allBtns.forEach(btn => {
+                    btn.disabled = true;
+                    if (btn === selectedBtn) btn.classList.add('correct');
+                });
+
+                const feedbackArea = document.getElementById(`feedback-${stepIndex}`);
+                feedbackArea.classList.add('show');
+                
+                if(window.MathJax) MathJax.typesetPromise([feedbackArea]).catch((err) => console.log(err.message));
+            } else {
+                if (!selectedBtn.classList.contains('wrong')) {
+                    selectedBtn.classList.add('wrong');
+                    selectedBtn.disabled = true; 
+                    errorsMade++;
+                }
+            }
+        }
+
+        function nextStep(currentIndex) {
+            const currentCard = document.getElementById(`step-${currentIndex}`);
+            currentCard.classList.remove('active');
+            currentCard.style.display = 'none';
+
+            if (currentIndex < steps.length - 1) {
+                const nextCard = document.getElementById(`step-${currentIndex + 1}`);
+                nextCard.style.display = 'block';
+                setTimeout(() => nextCard.classList.add('active'), 50);
+                
+                // Maj compteur header
+                document.getElementById('step-counter').textContent = currentIndex + 2;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                endExercise();
+            }
+        }
+
+        function endExercise() {
+            let score = Math.max(0, 8 - errorsMade);
+            localStorage.setItem('score_exo3', `${score}/8`); // Sauvegardé sous la clé exo3
+            
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('end-modal').style.display = 'flex';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initUser();
+            renderSteps();
+        });
+    </script>
+</body>
+</html>
