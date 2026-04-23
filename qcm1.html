@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QCM 1 - Maths 1ère</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #ec4899;
+            --success: #10B981;
+            --danger: #EF4444;
+            --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-dark: #1f2937;
+            --text-light: #4b5563;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        /* En-tête */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-info .avatar { font-size: 2rem; background: white; padding: 5px; border-radius: 50%; }
+        .user-info .pseudo { font-weight: 700; color: var(--primary); }
+        
+        .progress-container { text-align: right; }
+        .progress-text { font-weight: 600; font-size: 0.9rem; color: var(--text-dark); }
+        
+        .btn-back {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Conteneur des questions */
+        #quiz-container { max-width: 800px; margin: 0 auto; width: 100%; padding-bottom: 80px; }
+
+        .question-card {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .question-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid transparent;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.15);
+        }
+
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+        /* États des réponses */
+        .option-btn.correct { background: var(--success); color: white; border-color: var(--success); transform: scale(1.02); }
+        .option-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
+
+        /* Boîte d'explication */
+        .explanation-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border-left: 5px solid var(--primary);
+            display: none;
+            font-size: 0.95rem;
+            color: var(--text-light);
+            animation: slideDown 0.3s ease-out forwards;
+        }
+
+        .explanation-box.show { display: block; }
+        .explanation-box strong { color: var(--primary); }
+
+        /* Modal de fin */
+        #end-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h2 { font-size: 2rem; color: var(--primary); margin-bottom: 10px; }
+        .score-display { font-size: 3.5rem; font-weight: 700; color: var(--text-dark); margin: 20px 0; }
+        
+        .btn-finish {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        footer { text-align: center; padding: 20px; font-size: 0.8rem; color: var(--text-light); margin-top: auto; }
+        footer strong { color: var(--primary); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header class="glass-panel">
+        <a href="index.html" class="btn-back">◄ Retour</a>
+        <div class="user-info">
+            <span class="avatar" id="header-avatar">👨‍🎓</span>
+            <span class="pseudo" id="header-pseudo">Adam</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-text"><span id="answered-count">0</span> / 15</div>
+        </div>
+    </header>
+
+    <main id="quiz-container">
+        </main>
+
+    <div id="end-modal">
+        <div class="modal-content">
+            <h2>Terminé ! 🎉</h2>
+            <p>Voici ton score pour le QCM 1 :</p>
+            <div class="score-display"><span id="final-score">0</span>/15</div>
+            <p>Tes résultats sont enregistrés.</p>
+            <a href="index.html" class="btn-finish">Retour au menu</a>
+        </div>
+    </div>
+
+    <footer>Conçu par <strong>Boris KINNOUEZAN</strong></footer>
+
+    <script>
+        // --- BASE DE DONNÉES DES QUESTIONS ---
+        const questions = [
+            {
+                q: "1. Simplifier l'expression : A = (e<sup>-15</sup> &times; e<sup>6</sup>) / e<sup>-4</sup>",
+                options: ["e<sup>-5</sup>", "e<sup>-13</sup>", "e<sup>-25</sup>"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> e<sup>a</sup> &times; e<sup>b</sup> = e<sup>a+b</sup>. Au numérateur : -15 + 6 = -9. Ensuite, e<sup>a</sup> / e<sup>b</sup> = e<sup>a-b</sup>. Donc -9 - (-4) = -9 + 4 = -5. Résultat : e<sup>-5</sup>."
+            },
+            {
+                q: "2. Résoudre dans &reals; l'équation : e<sup>2x+1</sup> = 1",
+                options: ["x = 0", "x = -1/2", "x = -1"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> On sait que 1 = e<sup>0</sup>. Donc l'équation revient à 2x + 1 = 0, ce qui donne 2x = -1, soit x = -1/2."
+            },
+            {
+                q: "3. Résoudre l'inéquation : e<sup>x-3</sup> > e<sup>2</sup>",
+                options: ["x > 5", "x < 5", "x > -1"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> La fonction exponentielle est strictement croissante sur &reals;. On conserve l'ordre : x - 3 > 2, donc x > 5."
+            },
+            {
+                q: "4. Quelle est la dérivée de la fonction f(x) = e<sup>-3x+2</sup> ?",
+                options: ["-3x e<sup>-3x+2</sup>", "e<sup>-3</sup>", "-3e<sup>-3x+2</sup>"],
+                correct: 2,
+                ex: "<strong>Explication :</strong> La dérivée de e<sup>u(x)</sup> est u'(x)e<sup>u(x)</sup>. Ici u(x) = -3x+2, donc u'(x) = -3. La dérivée est -3e<sup>-3x+2</sup>."
+            },
+            {
+                q: "5. Simplifier l'expression : (e<sup>x</sup>)<sup>2</sup> &times; e<sup>-x</sup>",
+                options: ["e<sup>x</sup>", "e<sup>2x</sup>", "e<sup>-x²</sup>"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> (e<sup>x</sup>)<sup>2</sup> = e<sup>2x</sup>. Ensuite, e<sup>2x</sup> &times; e<sup>-x</sup> = e<sup>2x - x</sup> = e<sup>x</sup>."
+            },
+            {
+                q: "6. Résoudre l'équation produit : (x - 2)e<sup>x</sup> = 0",
+                options: ["x = 2", "x = 2 ou x = 0", "Impossible"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> Un produit est nul si l'un de ses facteurs est nul. Or, pour tout réel x, e<sup>x</sup> > 0 (jamais nul). Il reste donc uniquement x - 2 = 0, soit x = 2."
+            },
+            {
+                q: "7. Résoudre l'équation du second degré : x² - 5x + 6 = 0",
+                options: ["S = {-2 ; -3}", "S = {1 ; 6}", "S = {2 ; 3}"],
+                correct: 2,
+                ex: "<strong>Explication :</strong> Le discriminant &Delta; = (-5)² - 4(1)(6) = 25 - 24 = 1. Les racines sont (5 - 1)/2 = 2 et (5 + 1)/2 = 3."
+            },
+            {
+                q: "8. Quelle est la forme canonique de f(x) = x² - 4x + 5 ?",
+                options: ["(x - 4)² + 5", "(x - 2)² + 1", "(x + 2)² - 1"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> x² - 4x est le début de l'identité (x - 2)² = x² - 4x + 4. Donc x² - 4x + 5 = (x - 2)² - 4 + 5 = (x - 2)² + 1."
+            },
+            {
+                q: "9. Quelle est l'équation de la tangente à f(x) = e<sup>x</sup> au point d'abscisse x = 0 ?",
+                options: ["y = x", "y = x + 1", "y = e<sup>x</sup> + 1"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> Formule : y = f'(0)(x - 0) + f(0). On a f(0) = e<sup>0</sup> = 1 et f'(0) = e<sup>0</sup> = 1. Donc y = 1(x) + 1 = x + 1."
+            },
+            {
+                q: "10. Quel est le sens de variation de la fonction f(x) = e<sup>-x</sup> ?",
+                options: ["Croissante sur &reals;", "Décroissante sur &reals;", "Constante"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> Sa dérivée est f'(x) = -e<sup>-x</sup>. Comme e<sup>-x</sup> > 0, la dérivée est strictement négative, donc f est strictement décroissante."
+            },
+            {
+                q: "11. Calculer la dérivée de f(x) = x e<sup>x</sup>",
+                options: ["e<sup>x</sup>", "x e<sup>x</sup>", "e<sup>x</sup>(x + 1)"],
+                correct: 2,
+                ex: "<strong>Explication :</strong> On utilise (uv)' = u'v + uv' avec u(x) = x et v(x) = e<sup>x</sup>. f'(x) = 1&times;e<sup>x</sup> + x&times;e<sup>x</sup> = e<sup>x</sup>(1 + x)."
+            },
+            {
+                q: "12. Résoudre l'équation : e<sup>x²</sup> = e<sup>4</sup>",
+                options: ["S = {2}", "S = {-2 ; 2}", "S = {16}"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> En identifiant les exposants : x² = 4. Les solutions sont x = &radic;4 = 2 et x = -&radic;4 = -2."
+            },
+            {
+                q: "13. Résoudre l'équation : (e<sup>x</sup> - 1)(x + 3) = 0",
+                options: ["x = 0 ou x = -3", "x = 1 ou x = -3", "x = -3"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> Soit e<sup>x</sup> - 1 = 0 &rArr; e<sup>x</sup> = 1 &rArr; x = 0. Soit x + 3 = 0 &rArr; x = -3."
+            },
+            {
+                q: "14. Quelle est la dérivée du polynôme f(x) = -2x³ + 5x ?",
+                options: ["-2x² + 5", "-6x² + 5", "-6x + 5"],
+                correct: 1,
+                ex: "<strong>Explication :</strong> On dérive terme à terme : la dérivée de x³ est 3x², donc -2(3x²) = -6x². La dérivée de 5x est 5. Donc f'(x) = -6x² + 5."
+            },
+            {
+                q: "15. Simplifier l'expression : e<sup>x+1</sup> / e<sup>1-x</sup>",
+                options: ["e<sup>2x</sup>", "e<sup>2</sup>", "e<sup>2x+2</sup>"],
+                correct: 0,
+                ex: "<strong>Explication :</strong> On soustrait les exposants : (x + 1) - (1 - x) = x + 1 - 1 + x = 2x. Le résultat est e<sup>2x</sup>."
+            }
+        ];
+
+        let currentScore = 0;
+        let answeredQuestions = 0;
+
+        // --- INITIALISATION UTILISATEUR ---
+        function initUser() {
+            const storedUser = localStorage.getItem('mathAppUser');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                document.getElementById('header-pseudo').textContent = userData.pseudo;
+                document.getElementById('header-avatar').textContent = userData.avatar;
+            } else {
+                // Redirection si pas connecté
+                window.location.href = 'index.html';
+            }
+        }
+
+        // --- GÉNÉRATION DES QUESTIONS ---
+        function renderQuestions() {
+            const container = document.getElementById('quiz-container');
+            
+            questions.forEach((qObj, qIndex) => {
+                // Création de la carte
+                const card = document.createElement('div');
+                card.className = 'glass-panel question-card';
+                card.id = `question-${qIndex}`;
+
+                // Titre de la question
+                const title = document.createElement('div');
+                title.className = 'question-title';
+                title.innerHTML = qObj.q;
+                card.appendChild(title);
+
+                // Grille d'options
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+
+                qObj.options.forEach((optText, optIndex) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerHTML = optText;
+                    btn.onclick = () => handleAnswer(qIndex, optIndex, btn, grid);
+                    grid.appendChild(btn);
+                });
+
+                card.appendChild(grid);
+
+                // Boîte d'explication (masquée par défaut)
+                const explBox = document.createElement('div');
+                explBox.className = 'explanation-box';
+                explBox.id = `expl-${qIndex}`;
+                explBox.innerHTML = qObj.ex;
+                card.appendChild(explBox);
+
+                container.appendChild(card);
+            });
+        }
+
+        // --- GESTION DES RÉPONSES ---
+        function handleAnswer(qIndex, optIndex, selectedBtn, gridContainer) {
+            const qObj = questions[qIndex];
+            const isCorrect = (optIndex === qObj.correct);
+            const allBtns = gridContainer.querySelectorAll('.option-btn');
+
+            // Désactiver tous les boutons de cette question
+            allBtns.forEach((btn, index) => {
+                btn.disabled = true;
+                if (index === qObj.correct) {
+                    btn.classList.add('correct'); // Montre la bonne réponse
+                }
+            });
+
+            // Gérer le score et le style du bouton cliqué
+            if (isCorrect) {
+                currentScore++;
+            } else {
+                selectedBtn.classList.add('wrong'); // Montre l'erreur en rouge
+            }
+
+            // Afficher l'explication
+            const explBox = document.getElementById(`expl-${qIndex}`);
+            explBox.classList.add('show');
+
+            // Mettre à jour la progression
+            answeredQuestions++;
+            document.getElementById('answered-count').textContent = answeredQuestions;
+
+            // Vérifier si le QCM est terminé
+            if (answeredQuestions === questions.length) {
+                endQuiz();
+            }
+        }
+
+        // --- FIN DU QCM ---
+        function endQuiz() {
+            // Sauvegarde du score
+            localStorage.setItem('score_qcm1', `${currentScore}/15`);
+
+            // Affichage du modal après un léger délai pour voir la dernière réponse
+            setTimeout(() => {
+                document.getElementById('final-score').textContent = currentScore;
+                document.getElementById('end-modal').style.display = 'flex';
+            }, 1000);
+        }
+
+        // --- LANCEMENT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initUser();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
